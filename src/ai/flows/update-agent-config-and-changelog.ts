@@ -137,9 +137,7 @@ const prompt = ai.definePrompt({
 {{{onboardingTranscript}}}
 \`\`\`
 
-**Your Output (JSON object containing v2AccountMemo, v2AgentSpec, and changelog):**
-\`\`\`json
-`,
+**Your Output (JSON object containing v2AccountMemo, v2AgentSpec, and changelog):**`,
 });
 
 const updateAgentConfigAndChangelogFlow = ai.defineFlow(

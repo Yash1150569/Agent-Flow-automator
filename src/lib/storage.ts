@@ -1,4 +1,4 @@
-import { AccountMemoOutput, RetellAgentConfigOutput } from '@/ai/flows/generate-preliminary-agent-config';
+import type { AccountMemoOutput, RetellAgentConfigOutput } from '@/ai/flows/generate-preliminary-agent-config';
 
 export type AccountData = {
   account_id: string;
