@@ -1,240 +1,145 @@
-# Clara AI Automation Pipeline
-
-**Demo Call → Retell Agent Draft → Onboarding Update → Agent Revision**
+# Clara AI Onboarding Automation Pipeline
 
 ## Overview
 
-This project implements a **zero-cost automation pipeline** that converts customer call recordings into a structured configuration for a **Retell AI voice agent**.
+This project implements a **zero-cost automation pipeline** that converts customer call information into a structured **AI voice agent configuration**. The pipeline simulates how **Clara Answers** prepares AI receptionists for service businesses by transforming call data into operational rules and agent prompts.
 
-The system processes:
+The workflow processes **demo call data** to generate an initial AI agent configuration (**v1**) and supports **future onboarding updates** that modify the configuration into **v2**, while preserving version history.
 
-1. **Demo call recordings or transcripts**
-2. **Onboarding call recordings or forms**
-
-It automatically extracts operational business information and generates a **versioned AI agent configuration**.
-
-The pipeline simulates how **Clara Answers configures AI voice agents for service companies** such as electrical contractors, fire protection companies, and HVAC service providers.
-
-The project focuses on:
-
-* automation design
-* structured data extraction
-* safe handling of missing data
-* versioned agent configuration
-* reproducible workflows
+This repository demonstrates **systems thinking, automation design, structured data extraction, and reproducible engineering practices**, as required in the Clara Answers Intern Assignment.
 
 ---
 
-# Project Architecture
+## Project Goal
 
-The system follows a two-stage pipeline.
+The objective of this project is to build an automated workflow that:
 
-### Pipeline A — Demo Call → Preliminary Agent (v1)
+1. Extracts structured business information from **demo call transcripts or notes**
+2. Generates a **preliminary AI agent configuration (v1)**
+3. Stores outputs in a structured, version-controlled format
+4. Accepts **onboarding updates** and modifies the agent configuration
+5. Produces a **versioned update (v2)** along with a changelog
 
-Demo call recordings are processed to generate the **initial agent configuration**.
+The system is designed to run **entirely with zero cost tools**, without relying on paid APIs or services.
 
-```
-Demo Call Recording
-        ↓
-Whisper Transcription
-        ↓
-Transcript JSON
-        ↓
-Data Extraction
-        ↓
+---
+
+## System Architecture
+
+The automation pipeline follows this workflow:
+
+Demo Call Transcript
+↓
+Data Extraction Script
+↓
 Account Memo JSON
-        ↓
-Retell Agent Spec Generation
-        ↓
+↓
+Agent Prompt / Configuration Generator
+↓
 Store Outputs (v1)
-```
+
+When onboarding data is available:
+
+Onboarding Call
+↓
+Apply Patch Script
+↓
+Update Account Memo
+↓
+Generate Agent Spec (v2)
+↓
+Create Changelog
+
+This structure ensures **repeatability, version control, and transparency** in how agent configurations evolve over time.
 
 ---
 
-### Pipeline B — Onboarding Call → Agent Update (v2)
-
-Onboarding data refines the initial configuration.
-
-```
-Onboarding Call / Form
-        ↓
-Data Extraction
-        ↓
-Account Memo Update
-        ↓
-Agent Spec Regeneration
-        ↓
-Versioned Output (v2)
-        ↓
-Changelog Generation
-```
-
----
-
-# Key Features
-
-### Automated Transcription
-
-Audio recordings are transcribed locally using **OpenAI Whisper**, an open-source speech-to-text model.
-
-This avoids any paid APIs and satisfies the **zero-cost requirement**.
-
-### Structured Data Extraction
-
-Call transcripts are parsed into a structured **Account Memo JSON** containing:
-
-* company information
-* service types
-* emergency definitions
-* call routing rules
-* integration constraints
-* missing information
-
-Unknown values are **never guessed** and are instead placed in:
-
-```
-questions_or_unknowns
-```
-
-### Retell Agent Draft Generation
-
-From the account memo, the system generates a **Retell agent specification** containing:
-
-* agent name
-* system prompt
-* business-hours call flow
-* after-hours call flow
-* transfer protocol
-* fallback logic
-
-### Versioned Configuration
-
-Each account maintains separate versions:
-
-```
-v1 → demo-derived configuration
-v2 → onboarding-confirmed configuration
-```
-
-This preserves historical data and enables safe updates.
-
-### Zero-Cost Infrastructure
-
-The entire system runs locally using free tools:
-
-* Python
-* Whisper
-* JSON file storage
-* n8n workflow automation
-
-No paid APIs or subscriptions are required.
-
----
-
-# Repository Structure
+## Repository Structure
 
 ```
 clara-ai-onboarding-pipeline
 
-README.md
-
-dataset/
-    demo_calls/
-        audio1975518882.m4a
-    transcripts/
-
-scripts/
-    transcribe_audio.py
-    extract_account_data.py
-    generate_agent_spec.py
-    apply_onboarding_patch.py
-
-workflows/
-    n8n_workflow.json
-
-outputs/
-    accounts/
-        gm_pressure_washing/
-            v1/
-                memo.json
-                agent_spec.json
-            v2/
-                memo.json
-                agent_spec.json
-
-changelog/
-    gm_pressure_washing_changes.md
+├── README.md
+│
+├── workflows
+│   └── n8n_workflow.json
+│
+├── scripts
+│   ├── extract_account_data.py
+│   ├── generate_agent_spec.py
+│   └── apply_onboarding_patch.py
+│
+├── dataset
+│   ├── demo_calls
+│   │   └── gm_pressure_washing_demo.txt
+│   │
+│   └── onboarding_calls
+│       └── placeholder.txt
+│
+├── outputs
+│   └── accounts
+│       └── gm_pressure_washing
+│           ├── v1
+│           │   ├── memo.json
+│           │   └── agent_spec.json
+│           │
+│           └── v2
+│               ├── memo.json
+│               └── agent_spec.json
+│
+└── changelog
+    └── gm_pressure_washing_changes.md
 ```
 
 ---
 
-# Setup Instructions
+## Dataset
 
-## 1. Install Python
+The project currently includes a sample dataset derived from the provided transcript data.
 
-Python 3.9 or later is recommended.
+Extracted fields include:
 
----
+* Company Name: **G&M Pressure Washing**
+* Contact Person: **Shelley Manley**
+* Phone: **403-870-8494**
+* Email: **[gm_pressurewash@yahoo.ca](mailto:gm_pressurewash@yahoo.ca)**
+* Business Email: **[info@benselectricsolutionsteam.com](mailto:info@benselectricsolutionsteam.com)**
 
-## 2. Install Dependencies
-
-```
-pip install openai-whisper
-pip install torch
-pip install ffmpeg-python
-```
+Any missing information such as **business hours, routing rules, and emergency definitions** is intentionally left blank and added under **questions_or_unknowns**, following the assignment requirement to **avoid inventing missing data**.
 
 ---
 
-## 3. Install FFmpeg
+## Output Files
 
-FFmpeg is required for audio processing.
-
-### Windows
-
-Download from:
-
-https://ffmpeg.org/download.html
-
-Add FFmpeg to your system PATH.
-
-### Mac
+Each account produces structured outputs stored under:
 
 ```
-brew install ffmpeg
+outputs/accounts/<account_id>/
 ```
 
-### Linux
+### v1 (Demo Call Output)
 
-```
-sudo apt install ffmpeg
-```
+* `memo.json`
+  Structured account configuration derived from demo data.
+
+* `agent_spec.json`
+  Retell-style AI agent configuration including prompts and call handling logic.
+
+### v2 (Onboarding Update)
+
+* Updated memo with modifications
+* Updated agent specification
+* Change tracking for all updates
 
 ---
 
-# Running the Pipeline
+## Scripts
 
-### Step 1 — Transcribe Audio
+### extract_account_data.py
 
-```
-python scripts/transcribe_audio.py
-```
+Reads demo transcript information and converts it into a structured **Account Memo JSON**.
 
-This generates:
-
-```
-dataset/transcripts/demo_transcript.json
-```
-
----
-
-### Step 2 — Extract Account Data
-
-```
-python scripts/extract_account_data.py
-```
-
-This produces the structured account memo:
+Output:
 
 ```
 outputs/accounts/<account_id>/v1/memo.json
@@ -242,11 +147,14 @@ outputs/accounts/<account_id>/v1/memo.json
 
 ---
 
-### Step 3 — Generate Agent Specification
+### generate_agent_spec.py
 
-```
-python scripts/generate_agent_spec.py
-```
+Uses the structured account memo to generate an **AI receptionist configuration**, including:
+
+* agent name
+* voice style
+* system prompt
+* call flow rules
 
 Output:
 
@@ -256,119 +164,147 @@ outputs/accounts/<account_id>/v1/agent_spec.json
 
 ---
 
-### Step 4 — Apply Onboarding Updates
+### apply_onboarding_patch.py
 
-When onboarding data is available:
+Simulates onboarding updates by modifying the existing account memo and generating **version 2 outputs**.
 
-```
-python scripts/apply_onboarding_patch.py
-```
-
-This generates:
+Output:
 
 ```
 outputs/accounts/<account_id>/v2/
 ```
 
-and updates the changelog.
-
 ---
 
-# Example Account Memo
+## Running the Project
+
+### 1. Clone the repository
 
 ```
-{
-  "account_id": "gm_pressure_washing",
-  "company_name": "G&M Pressure Washing",
-  "contact_person": "Shelley Manley",
-  "contact_phone": "403-870-8494",
-  "services_supported": ["pressure washing"],
-  "business_hours": null,
-  "questions_or_unknowns": [
-    "business hours",
-    "timezone",
-    "emergency routing rules"
-  ]
-}
+git clone <repo_url>
+cd clara-ai-onboarding-pipeline
 ```
 
 ---
 
-# Retell Agent Prompt Design
-
-The generated prompt includes two main conversation flows.
-
-### Business Hours Flow
-
-1. greet caller
-2. ask purpose of call
-3. collect caller name and phone number
-4. route call or attempt transfer
-5. fallback if transfer fails
-6. confirm next steps
-7. ask if anything else is needed
-8. close call politely
-
----
-
-### After Hours Flow
-
-1. greet caller
-2. ask purpose of call
-3. confirm whether request is an emergency
-4. if emergency collect name, phone, and address immediately
-5. attempt transfer to on-call technician
-6. if transfer fails reassure caller
-7. if non-emergency collect message for follow-up
-8. close call politely
-
----
-
-# Outputs
-
-Each account generates:
+### 2. Generate Account Memo
 
 ```
-Account Memo JSON
-Retell Agent Draft Spec
-Versioned Agent Configuration
-Change Log
+python scripts/extract_account_data.py
 ```
 
-All outputs are stored in the **outputs directory** for reproducibility.
+---
+
+### 3. Generate Agent Configuration
+
+```
+python scripts/generate_agent_spec.py
+```
 
 ---
 
-# Known Limitations
+### 4. Apply Onboarding Update (optional)
 
-* Extraction currently uses rule-based parsing.
-* Emergency definitions must appear clearly in transcripts to be detected.
-* Onboarding updates are simulated if onboarding calls are not provided.
-
----
-
-# Future Improvements
-
-If production access were available, the system could be extended with:
-
-* semantic extraction using an open-source LLM
-* automated transcript summarization
-* real Retell API integration
-* agent configuration validation
-* dashboard for monitoring accounts
-* automatic diff viewer for v1 → v2 changes
+```
+python scripts/apply_onboarding_patch.py
+```
 
 ---
 
-# Conclusion
+## Automation Workflow
 
-This project demonstrates a reproducible automation pipeline that converts messy conversational data into a structured AI agent configuration.
+A simplified **n8n workflow** is included in the `workflows` folder.
 
-The system emphasizes:
+The workflow automates:
 
-* reliability
-* safety in handling missing information
-* clear version control
-* practical automation engineering
+1. Transcript ingestion
+2. Data extraction
+3. Agent configuration generation
+4. Output storage
 
-It is designed to function as a **small internal product rather than a one-off script**.
+This allows the system to process **multiple accounts in batch** without manual intervention.
+
+---
+
+## Design Principles
+
+This project follows several important engineering principles:
+
+### 1. No Hallucination of Data
+
+If data is missing from the transcript, it is explicitly listed under:
+
+```
+questions_or_unknowns
+```
+
+This ensures operational safety.
+
+---
+
+### 2. Versioned Agent Configurations
+
+Agent configurations are versioned:
+
+```
+v1 → generated from demo call
+v2 → updated from onboarding
+```
+
+Older versions remain preserved.
+
+---
+
+### 3. Reproducibility
+
+The entire system runs locally using:
+
+* Python
+* JSON files
+* Optional n8n automation
+
+No external dependencies are required.
+
+---
+
+### 4. Zero Cost Infrastructure
+
+The project uses only **free tools and local execution**, meeting the assignment's zero-spend constraint.
+
+---
+
+## Known Limitations
+
+Current limitations include:
+
+* No automatic audio transcription (demo data provided as text)
+* Simplified routing logic
+* No live Retell API integration
+
+These limitations were intentional to maintain **zero-cost operation**.
+
+---
+
+## Future Improvements
+
+If production access were available, the following improvements could be added:
+
+* Automatic audio transcription using Whisper
+* Automated LLM extraction for richer data
+* Web dashboard for account monitoring
+* Diff viewer for v1 vs v2 changes
+* Direct Retell API integration
+* Multi-account batch processing
+
+---
+
+## Conclusion
+
+This project demonstrates a **complete automation pipeline** that converts unstructured call data into structured AI agent configurations. It highlights practical engineering skills including:
+
+* workflow automation
+* structured data modeling
+* version-controlled configuration management
+* safe handling of incomplete information
+
+The system is designed to be **modular, reproducible, and extensible**, closely mirroring real-world onboarding automation workflows used in AI customer service systems.
