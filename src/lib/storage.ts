@@ -4,8 +4,8 @@ export type AccountData = {
   account_id: string;
   company_name: string;
   v1: {
-    memo: AccountMemoOutput;
-    agent: RetellAgentConfigOutput;
+    memo: any; // Using any to stay flexible with schema evolution
+    agent: any;
     timestamp: string;
   };
   v2?: {
@@ -21,7 +21,7 @@ class Storage {
   private accounts: Map<string, AccountData> = new Map();
 
   constructor() {
-    // We could load from local storage or a file in a real app
+    // In-memory storage for the prototype
   }
 
   saveAccount(data: AccountData) {

@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A Genkit flow for updating an existing Retell Agent configuration and Account Memo JSON based on new onboarding information.
+ * @fileOverview A Genkit flow for updating an existing Retell Agent configuration and Account Memo JSON based on new onboarding information (Pipeline B).
  */
 
 import {ai} from '@/ai/genkit';
@@ -30,13 +30,13 @@ const prompt = ai.definePrompt({
   name: 'updateAgentConfigAndChangelogPrompt',
   input: { schema: UpdateAgentConfigAndChangelogInputSchema },
   output: { schema: UpdateAgentConfigAndChangelogOutputSchema },
-  prompt: `You are an expert automation engineer. Update the existing Retell Agent configuration (v1) and Account Memo (v1) to v2 based on the onboarding transcript.
+  prompt: `You are an expert automation engineer for the Clara AI Pipeline. Your task is to transition an account from v1 (Preliminary) to v2 (Production-Ready) based on onboarding feedback.
 
 Instructions:
-1. Generate 'v2AccountMemo' by applying updates from the transcript to v1.
-2. Generate 'v2AgentSpec' with 'version' set to "v2".
-3. Update the 'system_prompt' and flows based on new routing rules or business hours.
-4. Create a detailed Markdown 'changelog' listing old vs new values for every change.
+1. Generate 'v2AccountMemo' by merging onboarding data into the v1 memo. Ensure 'version' is set to "v2" or noted.
+2. Generate 'v2AgentSpec' by updating prompts, variables, and flows. 'version' MUST be "v2".
+3. If no onboarding data is relevant, create the v2 placeholder as requested in the Clara specs.
+4. Create a Markdown 'changelog' showing exactly what was added, removed, or modified.
 
 Account ID: {{{account_id}}}
 
@@ -46,7 +46,7 @@ V1 Account Memo:
 V1 Retell Agent Spec:
 {{{v1AgentSpec}}}
 
-Onboarding Transcript:
+Onboarding Transcript/Feedback:
 {{{onboardingTranscript}}}
 `,
 });
